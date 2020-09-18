@@ -57,6 +57,14 @@ public class ArrowCollision : MonoBehaviour
         //Apply damage to the hit gameObject, or whatever
         //Destroy(gameObject);
         myRigidbody.constraints = RigidbodyConstraints.FreezeAll;
+        if (hitObject.CompareTag("Target"))
+        {
+            if (UIReceiver.Mode == "Classic")
+            {
+                LoadManager.Instance.LoadSceneAdditive(SceneNames.CLASSIC_SUCCESS, false);
+                ArrowMovement.GameOver();
+            }
+        }
         
     }
 }

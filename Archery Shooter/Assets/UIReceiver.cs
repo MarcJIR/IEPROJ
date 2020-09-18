@@ -16,7 +16,7 @@ public class UIReceiver : MonoBehaviour
         EventBroadcaster.Instance.AddObserver(EventNames.Archery_Events.ON_GO_TO_MAIN_MENU, this.GoToMenu);
         EventBroadcaster.Instance.AddObserver(EventNames.Archery_Events.ON_SFX, this.SFX);
         EventBroadcaster.Instance.AddObserver(EventNames.Archery_Events.ON_MUSIC, this.Music);
-        EventBroadcaster.Instance.AddObserver(EventNames.Archery_Events.ON_NEXT, this.NextStage);
+        EventBroadcaster.Instance.AddObserver(EventNames.Archery_Events.ON_NEXT, this.Next);
         EventBroadcaster.Instance.AddObserver(EventNames.Archery_Events.ON_RETRY, this.Retry);
         EventBroadcaster.Instance.AddObserver(EventNames.Archery_Events.ON_PAUSE, this.Pause);
         EventBroadcaster.Instance.AddObserver(EventNames.Archery_Events.ON_GO_TO_CLASSIC, this.GoToClassic);
@@ -58,7 +58,7 @@ public class UIReceiver : MonoBehaviour
     {
         Level = " ";
         Stage = " ";
-        Mode = " "; 
+        Mode = " ";
         LoadManager.Instance.LoadScene(SceneNames.MAIN_MENU);
     }
 
@@ -73,13 +73,16 @@ public class UIReceiver : MonoBehaviour
         LoadManager.Instance.LoadScene(SceneNames.SETTINGS);
     }
     //make levels as prefabs and just instantiate
-    private void GoToClassic()
+    private void GoToClassic(Parameters parameter)
     {
+        Time.timeScale = 1.0f;
+        Stage = parameter.GetStringExtra("Stage", " ");
         LoadManager.Instance.LoadScene(SceneNames.CLASSIC_GAME);
     }
     
     private void GoToEndless(Parameters parameter)
     {
+        Time.timeScale = 1.0f;
         Mode = parameter.GetStringExtra("Mode", " ");
         LoadManager.Instance.LoadScene(SceneNames.ENDLESS_GAME);
     }
@@ -103,7 +106,7 @@ public class UIReceiver : MonoBehaviour
 
     private void GoToLevelSelect(Parameters parameter)
     {
-        Mode = parameter.GetStringExtra("Mode", " ");
+        Mode = parameter.GetStringExtra("Mode", Mode);
         LoadManager.Instance.LoadScene(SceneNames.LEVELS);
     }
 
@@ -116,12 +119,28 @@ public class UIReceiver : MonoBehaviour
 
     private void Retry()
     {
-
+        Time.timeScale = 1.0f;
+        if(Mode == "Classic")   LoadManager.Instance.LoadScene(SceneNames.CLASSIC_GAME);
+        else if(Mode == "Endless") LoadManager.Instance.LoadScene(SceneNames.ENDLESS_GAME);
     }
 
-    private void NextStage()
+    private void Next()
     {
-
+        string[] stage = Stage.Split(' ');
+        int num = int.Parse(stage[1]);
+        if (num >= 10)
+        {
+            string[] level = Level.Split(' ');
+            int lvl = int.Parse(level[1]);
+            num = 1;
+            lvl++;
+            Stage = stage[0] + " " + num;
+            Level = level[0] + " " + lvl;
+        }
+        else num++;
+        Stage = stage[0] + " " + num;
+        Time.timeScale = 1.0f;
+        LoadManager.Instance.LoadScene(SceneNames.CLASSIC_GAME);
     }
     //Single fxn for going back, just determine what the active scene/what is loaded is then load the respective previous scene
     private void GoBack()

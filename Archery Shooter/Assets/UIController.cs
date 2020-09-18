@@ -59,7 +59,11 @@ public class UIController : MonoBehaviour
     public void CallStageEvent(Button button)
     {
         Parameters parameter = new Parameters();
-        parameter.PutExtra("Level", button.name);
+        if (button.name.Contains("Level"))
+        {
+            parameter.PutExtra("Level", button.name);
+        }
+        else parameter.PutExtra("Level", UIReceiver.Level);
         EventBroadcaster.Instance.PostEvent(EventNames.Archery_Events.ON_GO_TO_STAGE, parameter);
     }
 
@@ -69,11 +73,22 @@ public class UIController : MonoBehaviour
         parameter.PutExtra("Mode", button.name);
         EventBroadcaster.Instance.PostEvent(EventNames.Archery_Events.ON_GO_TO_ENDLESS, parameter);
     }
-    public void CallClassicEvent()
-    { 
-        EventBroadcaster.Instance.PostEvent(EventNames.Archery_Events.ON_GO_TO_CLASSIC);
+    public void CallClassicEvent(Button button)
+    {
+        Parameters parameter = new Parameters();
+        parameter.PutExtra("Stage", button.name);
+        EventBroadcaster.Instance.PostEvent(EventNames.Archery_Events.ON_GO_TO_CLASSIC, parameter);
     }
 
+    public void CallNextEvent()
+    {
+        EventBroadcaster.Instance.PostEvent(EventNames.Archery_Events.ON_NEXT);
+    }
+
+    public void CallRetryEvent()
+    {
+        EventBroadcaster.Instance.PostEvent(EventNames.Archery_Events.ON_RETRY);
+    }
 
     public void CallExitEvent()
     {

@@ -25,8 +25,23 @@ public class SceneChangeListener : MonoBehaviour
                 if (obj.name == "Canvas")
                 {
                     obj.transform.Find(mode).gameObject.SetActive(true);
+                    if(mode == "Classic")
+                    {
+                        obj.transform.Find(mode).transform.Find("LevelStageText").GetComponent<UnityEngine.UI.Text>().text = UIReceiver.Level + " - " + UIReceiver.Stage;
+                    }                    
                     break;
                 }
+            }
+        }
+
+        if (SceneManager.GetSceneByName(SceneNames.CLASSIC_SUCCESS).isLoaded)
+        {
+            //string[] stage = UIReceiver.Stage.Split;
+            if (UIReceiver.Stage.EndsWith("10"))
+            {
+                GameObject[] gObj = SceneManager.GetSceneByName(SceneNames.CLASSIC_SUCCESS).GetRootGameObjects();
+                gObj[0].transform.GetChild(2).Find("Level").gameObject.SetActive(true);
+                gObj[0].transform.GetChild(2).Find("Stage").gameObject.SetActive(false);
             }
         }
     }
