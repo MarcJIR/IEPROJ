@@ -95,4 +95,14 @@ public class UIController : MonoBehaviour
         EventBroadcaster.Instance.PostEvent(EventNames.Archery_Events.ON_EXIT_GAME);
     }
 
+    public void CallReset()
+    {
+        for (int i = 1; i < 4; i++)
+        {
+            PlayerPrefs.SetInt("Level " + i, 0);
+            PlayerPrefs.SetInt("Level 1", 1);
+        }
+        PlayerPrefs.Save();
+    }
+
 }

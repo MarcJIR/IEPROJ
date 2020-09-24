@@ -14,7 +14,7 @@ public class ArrowCollision : MonoBehaviour
     private Rigidbody myRigidbody;
 
     private Vector3 lastPosition;
-
+    private int targetNumber = 0;
     void Awake()
     {
         myRigidbody = GetComponent<Rigidbody>();
@@ -22,7 +22,7 @@ public class ArrowCollision : MonoBehaviour
         minimumExtent = Mathf.Min(Mathf.Min(GetComponent<Collider>().bounds.extents.x, GetComponent<Collider>().bounds.extents.y), GetComponent<Collider>().bounds.extents.z);
         partialExtent = minimumExtent * (1.0f - skinWidth);
         sqrMinimumExtent = minimumExtent * minimumExtent;
-
+        targetNumber = GameObject.Find("Player").GetComponent<ArrowMovement>().targetNumber;
     }
 
 
@@ -54,17 +54,27 @@ public class ArrowCollision : MonoBehaviour
     }
     void Impact(Vector3 pos, Vector3 normal, GameObject hitObject)
     {
-        //Apply damage to the hit gameObject, or whatever
-        //Destroy(gameObject);
         myRigidbody.constraints = RigidbodyConstraints.FreezeAll;
+        ArrowMovement moveScript = GameObject.Find("Player").GetComponent<ArrowMovement>();
+        int num = moveScript.ArrowsRemaining;
         if (hitObject.CompareTag("Target"))
+        {
+            targetNumber--;
+            Debug.Log("Number of Target: "+targetNumber);
+            moveScript.targetNumber = targetNumber;
+        }
+        if (targetNumber == 0)
         {
             if (UIReceiver.Mode == "Classic")
             {
                 LoadManager.Instance.LoadSceneAdditive(SceneNames.CLASSIC_SUCCESS, false);
-                ArrowMovement.GameOver();
+                moveScript.GameOver();
             }
         }
-        
+        if(num <= 0 && targetNumber > 0)
+        {
+            LoadManager.Instance.LoadSceneAdditive(SceneNames.CLASSIC_FAIL, false);
+            moveScript.GameOver();
+        }
     }
 }

@@ -6,12 +6,16 @@ using UnityEngine.EventSystems;
 
 public class ArrowMovement : MonoBehaviour
 {
-    public float speed = 5.0f;
+    public float speedOffset = 0.05f;
+    private float speed = 0.0f;
     public int ArrowsRemaining = 5;
     public float TimeRemaining = 10.0f;
     public bool TimeRunning = false;
+    private GameObject[] targetList;
+    public int targetNumber = 1;
+
+
     [SerializeField] private Text text;
-    [SerializeField] private GameObject templateObject;
     [SerializeField] private static List<GameObject> objectsSpawned = new List<GameObject>();
 
     private Vector3 start = new Vector3(0, 0);
@@ -21,19 +25,26 @@ public class ArrowMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        templateObject.SetActive(false);
         if (UIReceiver.Mode == "Classic") text.text = ArrowsRemaining.ToString();
         else if (UIReceiver.Mode == "Endless")
         {
             text.text = Mathf.CeilToInt(TimeRemaining).ToString();
             TimeRunning = true;
         }
+        targetList = GameObject.FindGameObjectsWithTag("Target");
+        targetNumber = targetList.Length;
+        Debug.Log("Number of Target: " + targetNumber);
     }
 
     // Update is called once per frame
     void Update()
     {
-        Debug.Log(UIReceiver.Mode);
+        if(targetList.Length == 0)
+        { 
+            targetList = GameObject.FindGameObjectsWithTag("Target");
+            targetNumber = targetList.Length;
+            Debug.Log("Number of Target: " + targetNumber);
+        }
         if (Time.timeScale == 0) return;
         if(UIReceiver.Mode == "Classic")
         {
@@ -44,29 +55,37 @@ public class ArrowMovement : MonoBehaviour
                 if (Input.GetMouseButtonDown(0))
                 {
                     start = Input.mousePosition;
-                    Debug.Log("Start: " + start);
+                    //Debug.Log("Start: " + start);
                 }
                 if (Input.GetMouseButtonUp(0))
                 {
                     end = Input.mousePosition;
                     dir = Vector3.Normalize(start - end);
-                    Debug.Log("Start - End: " + (start - end));
-                    Debug.Log("Start: " + start + ", End: " + end + ", Direction: " + dir);
+                    speed = Vector3.Distance(start, end) * speedOffset;
+                    //Debug.Log(speed);
+                    //Debug.Log("Start - End: " + (start - end));
+                    //Debug.Log("Start: " + start + ", End: " + end + ", Direction: " + dir);
                     if (dir != Vector3.zero)
                     {
                         GameObject myObject = this.SpawnDefault();
                         ArrowsRemaining--;
                         text.text = ArrowsRemaining.ToString();
                         Vector3 position = myObject.transform.localPosition;
-                        position.y = 0.2f;
-                        position.z = 0.0f;
+                        position.y = 1.85f;
+                        position.z = 1.0f;
 
                         Vector3 rotation = myObject.transform.localEulerAngles;
-                        if (dir.x < 0) position.x = -0.7f;
-                        else if (dir.x >= 0) position.x = 0.7f;
+                        if (dir.x < 0) position.x = 1.7f;
+                        else if (dir.x >= 0) position.x = -1.7f;
                         rotation.z = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+                        rotation.y = 180;
                         myObject.transform.localPosition = position;
                         myObject.transform.localEulerAngles = rotation;
+
+                        Vector3 playerRotation = this.transform.eulerAngles;
+                        if (dir.x < 0) playerRotation.y = 0;
+                        else if (dir.x >= 0) playerRotation.y = 180;
+                        this.transform.eulerAngles = playerRotation;
 
                         Rigidbody rObject = myObject.GetComponent<Rigidbody>();
                         rObject.constraints = RigidbodyConstraints.FreezePositionZ;
@@ -76,11 +95,10 @@ public class ArrowMovement : MonoBehaviour
                     }
                 }                
             }
-            else if (ArrowsRemaining <= 0)
-            {
-                LoadManager.Instance.LoadSceneAdditive(SceneNames.CLASSIC_FAIL, false);
-                GameOver();
-            }
+            //if (ArrowsRemaining <= 0)
+            //{
+
+            //}
         }
         if(UIReceiver.Mode == "Endless" && TimeRunning)
         {
@@ -131,13 +149,26 @@ public class ArrowMovement : MonoBehaviour
                 GameOver();
             }
         }
+        foreach(GameObject obj in objectsSpawned)
+        {
+            if(obj.transform.position.x >= 15.2f || obj.transform.position.x <= -3.2f)
+            { 
+                if(ArrowsRemaining <= 0)
+                {
+                    LoadManager.Instance.LoadSceneAdditive(SceneNames.CLASSIC_FAIL, false);
+                    GameOver();
+                }
+                else Destroy(obj);
+                objectsSpawned.Remove(obj);
+            }
+        }
     }
 
     private void FixedUpdate()
     {
         foreach (GameObject myObject in objectsSpawned)
         {   
-            if(myObject != null)
+            if(myObject != null && myObject.GetComponent<Rigidbody>().velocity != Vector3.zero)
             {
                 Vector3 rb = myObject.GetComponent<Rigidbody>().velocity;
                 Vector3 rotation = myObject.transform.localEulerAngles;
@@ -149,19 +180,20 @@ public class ArrowMovement : MonoBehaviour
 
     private GameObject SpawnDefault()
     {
-        GameObject myObject = GameObject.Instantiate(this.templateObject, this.transform);
+        GameObject myObject = GameObject.Instantiate(Resources.Load("Prefabs/Arrow(marc)") as GameObject, this.transform);
         myObject.SetActive(true);
 
         return myObject;
     }
 
-    public static void GameOver()
+    public void GameOver()
     {
         Time.timeScale = 0.0f;
         foreach(GameObject obj in objectsSpawned)
         {
             Destroy(obj);
         }
+        objectsSpawned.Clear();
     }
 }
 
