@@ -29,15 +29,15 @@ public class UIController : MonoBehaviour
     public void CallSFXEvent(Button button)
     {
         Parameters parameter = new Parameters();
-        parameter.PutExtra("State", button.name);
+        parameter.PutGObjectExtra("Button", button.gameObject);
         EventBroadcaster.Instance.PostEvent(EventNames.Archery_Events.ON_SFX, parameter);
     }
 
     public void CallMusicEvent(Button button)
     {
-        Parameters paramater = new Parameters();
-        paramater.PutExtra("State", button.name);
-        EventBroadcaster.Instance.PostEvent(EventNames.Archery_Events.ON_MUSIC, paramater);
+        Parameters parameter = new Parameters();
+        parameter.PutGObjectExtra("Button", button.gameObject);
+        EventBroadcaster.Instance.PostEvent(EventNames.Archery_Events.ON_MUSIC, parameter);
     }
 
     public void CallBackEvent()
@@ -97,12 +97,7 @@ public class UIController : MonoBehaviour
 
     public void CallReset()
     {
-        for (int i = 1; i < 4; i++)
-        {
-            PlayerPrefs.SetInt("Level " + i, 0);
-            PlayerPrefs.SetInt("Level 1", 1);
-        }
-        PlayerPrefs.Save();
+        EventBroadcaster.Instance.PostEvent(EventNames.Archery_Events.ON_RESET);
     }
-
+    
 }

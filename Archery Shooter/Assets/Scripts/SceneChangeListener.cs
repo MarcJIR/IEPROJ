@@ -19,11 +19,27 @@ public class SceneChangeListener : MonoBehaviour
                     PlayerPrefs.SetInt("Level 1", 1);
                     PlayerPrefs.Save();
                 }
-            }   
+            }
+            if (!PlayerPrefs.HasKey("SFX"))
+            {
+                PlayerPrefs.SetInt("SFX", 1);
+                PlayerPrefs.Save();
+            }
+            if (!PlayerPrefs.HasKey("Music"))
+            {
+                PlayerPrefs.SetInt("Music", 1);
+                PlayerPrefs.Save();
+            }
         }
+
+        if(SceneManager.GetActiveScene().name == SceneNames.SETTINGS || SceneManager.GetSceneByName(SceneNames.PAUSE).isLoaded)
+        {
+            this.GlobalSettings();
+        }
+
         if(SceneManager.GetActiveScene().name == SceneNames.LEVELS)
         {
-            for(int i = 1; i < 4; i++)
+            for (int i = 1; i < 4; i++)
             {
                 string lvl = "Level " + i;
                 if(PlayerPrefs.GetInt(lvl) > 0)
@@ -44,7 +60,15 @@ public class SceneChangeListener : MonoBehaviour
             }
         }
         if (SceneManager.GetActiveScene() == SceneManager.GetSceneByName(SceneNames.CLASSIC_GAME))
-        { 
+        {
+            if(UIReceiver.Stage == "Stage 1" && UIReceiver.Level == "Level 1")
+            {
+                GameObject.Find("Canvas").transform.Find("Tutorial").gameObject.SetActive(true);
+            }
+            else
+            {
+                GameObject.Find("Canvas").transform.Find("Tutorial").gameObject.SetActive(false);
+            }
             string obj = UIReceiver.Level + " " + UIReceiver.Stage;
             if (GameObject.Find(obj) == null)
             {
@@ -53,8 +77,8 @@ public class SceneChangeListener : MonoBehaviour
                 myStage.SetActive(true);
             }
         }
-        if(SceneManager.GetSceneByName(SceneNames.PAUSE).isLoaded)
-        {
+        if (SceneManager.GetSceneByName(SceneNames.PAUSE).isLoaded)
+        { 
             string mode = UIReceiver.Mode;
             GameObject[] list = SceneManager.GetSceneByName(SceneNames.PAUSE).GetRootGameObjects();
             foreach (GameObject obj in list)
@@ -73,7 +97,6 @@ public class SceneChangeListener : MonoBehaviour
 
         if (SceneManager.GetSceneByName(SceneNames.CLASSIC_SUCCESS).isLoaded)
         {
-            //string[] stage = UIReceiver.Stage.Split;
             if (UIReceiver.Stage.EndsWith("10"))
             {
                 GameObject[] gObj = SceneManager.GetSceneByName(SceneNames.CLASSIC_SUCCESS).GetRootGameObjects();
@@ -97,6 +120,44 @@ public class SceneChangeListener : MonoBehaviour
                     PlayerPrefs.Save();
                 }
             }
+        }
+    }
+
+    private void GlobalSettings()
+    {
+        GameObject sfx;
+        GameObject music;
+        GameObject[] settings = GameObject.FindGameObjectsWithTag("GlobalSettings");
+        if (settings[0].name == "SFX")
+        {
+            sfx = settings[0];
+            music = settings[1];
+        }
+        else
+        {
+            sfx = settings[1];
+            music = settings[0];
+        }
+        if (PlayerPrefs.GetInt("SFX") == 1)
+        {
+            sfx.transform.Find("On").gameObject.SetActive(true);
+            sfx.transform.Find("Off").gameObject.SetActive(false);
+        }
+        else
+        {
+            sfx.transform.Find("On").gameObject.SetActive(false);
+            sfx.transform.Find("Off").gameObject.SetActive(true);
+        }
+
+        if (PlayerPrefs.GetInt("Music") == 1)
+        {
+            music.transform.Find("On").gameObject.SetActive(true);
+            music.transform.Find("Off").gameObject.SetActive(false);
+        }
+        else
+        {
+            music.transform.Find("On").gameObject.SetActive(false);
+            music.transform.Find("Off").gameObject.SetActive(true);
         }
     }
 }

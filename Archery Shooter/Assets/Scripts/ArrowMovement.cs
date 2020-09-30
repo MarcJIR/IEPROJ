@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 
 public class ArrowMovement : MonoBehaviour
 {
-    public float speedOffset = 0.05f;
+    public float speedOffset = 0.02f;
     private float speed = 0.0f;
     public int ArrowsRemaining = 5;
     public float TimeRemaining = 10.0f;
@@ -21,6 +21,12 @@ public class ArrowMovement : MonoBehaviour
     private Vector3 start = new Vector3(0, 0);
     private Vector3 end = new Vector3(0, 0);
     private Vector3 dir = new Vector3(0, 0);
+    
+    private Vector3 lineEnd = new Vector3(0, 0);
+    private Vector3 lineDir = new Vector3(0, 0);
+    private List<GameObject> trajectory = new List<GameObject>();
+
+    public int trajectoryCount = 5;
 
     // Start is called before the first frame update
     void Start()
@@ -33,7 +39,6 @@ public class ArrowMovement : MonoBehaviour
         }
         targetList = GameObject.FindGameObjectsWithTag("Target");
         targetNumber = targetList.Length;
-        Debug.Log("Number of Target: " + targetNumber);
     }
 
     // Update is called once per frame
@@ -43,7 +48,6 @@ public class ArrowMovement : MonoBehaviour
         { 
             targetList = GameObject.FindGameObjectsWithTag("Target");
             targetNumber = targetList.Length;
-            Debug.Log("Number of Target: " + targetNumber);
         }
         if (Time.timeScale == 0) return;
         if(UIReceiver.Mode == "Classic")
@@ -62,6 +66,11 @@ public class ArrowMovement : MonoBehaviour
                     end = Input.mousePosition;
                     dir = Vector3.Normalize(start - end);
                     speed = Vector3.Distance(start, end) * speedOffset;
+                    foreach (GameObject traj in trajectory)
+                    {
+                        Destroy(traj);
+                    }
+                    trajectory.Clear();
                     //Debug.Log(speed);
                     //Debug.Log("Start - End: " + (start - end));
                     //Debug.Log("Start: " + start + ", End: " + end + ", Direction: " + dir);
@@ -93,12 +102,51 @@ public class ArrowMovement : MonoBehaviour
                         rObject.velocity = new Vector3(dir.x * speed, (dir.y * speed), 0.0f);
                         objectsSpawned.Add(myObject);
                     }
-                }                
-            }
-            //if (ArrowsRemaining <= 0)
-            //{
+                }
+                if(Input.GetMouseButton(0))
+                {
+                    lineEnd = Input.mousePosition;
+                    lineDir = Vector3.Normalize(start - lineEnd);
+                    speed = Vector3.Distance(start, lineEnd) * speedOffset;
+                    if(trajectory.Count == 0)
+                    {
+                        for(int i = 0; i < trajectoryCount; i++)
+                        {
+                            GameObject gObject = GameObject.Instantiate(Resources.Load("Prefabs/Trajectory Marker") as GameObject);
+                            trajectory.Add(gObject);
+                        }
 
-            //}
+                        Vector3 position = trajectory[0].transform.localPosition;
+                        position.y = 2.42f;
+                        position.z = 1.85f;
+                        if (lineDir.x < 0) position.x = -3.85f;
+                        else if (lineDir.x >= 0) position.x = -2.16f;
+                        trajectory[0].transform.localPosition = position;
+                        
+                        for (int i = 1; i < trajectoryCount; i++)
+                        {
+                            Vector3 nposition = position + new Vector3(lineDir.x * speed, lineDir.y * speed, 0.0f) * (i * 0.1f) + (0.5f * Physics.gravity * (i * 0.1f) * (i * 0.1f));
+                            trajectory[i].transform.localPosition = nposition;
+                        }
+                    }
+                    if(trajectory.Count > 0)
+                    {
+                        Vector3 position = trajectory[0].transform.localPosition;
+                        position.y = 2.42f;
+                        position.z = 1.85f;
+                        if (lineDir.x < 0) position.x = -3.85f;
+                        else if (lineDir.x >= 0) position.x = -2.16f;
+                        trajectory[0].transform.localPosition = position;
+                        for (int i = 1; i < trajectoryCount; i++)
+                        {
+                            Vector3 nposition = position + new Vector3(lineDir.x * speed, lineDir.y * speed, 0.0f) * (i * 0.1f) + (0.5f * Physics.gravity * (i * 0.1f) * (i * 0.1f));
+                            trajectory[i].transform.localPosition = nposition;
+                        }
+                    }
+
+                }
+            }
+            
         }
         if(UIReceiver.Mode == "Endless" && TimeRunning)
         {
@@ -196,101 +244,3 @@ public class ArrowMovement : MonoBehaviour
         objectsSpawned.Clear();
     }
 }
-
-//if (Input.touchSupported)
-//{
-//    if (Input.touchCount > 0)
-//    {
-//        Touch touch = Input.GetTouch(0);
-//        //if(touch.phase == TouchPhase.Began)
-//        //{
-//        //    Vector3 iPosition = touch.position;
-//        //}
-//        if (touch.phase == TouchPhase.Ended)
-//        {
-//            Vector3 dPosition = touch.deltaPosition;
-//            xDis = dPosition.x / 10.0f;
-//            yDis = dPosition.y / 10.0f;
-//            Debug.Log("x: " + xDis + ", y: " + yDis);
-
-//            GameObject myObject = this.SpawnDefault();
-//            Vector3 position = myObject.transform.localPosition;
-//            position.x = 0.2f;
-//            position.y = 0.2f;
-//            position.z = 0.0f;
-//            myObject.transform.localPosition = position;
-
-//            Rigidbody rObject = myObject.GetComponent<Rigidbody>();
-//            rObject.velocity = new Vector3(xDis, yDis, 0.0f);
-//            this.objectsSpawned.Add(myObject);
-//        }
-//    }
-//}
-
-//else
-//{ }
-
-
-//if (Input.GetMouseButtonDown(0))
-//{
-//GameObject myObject = this.SpawnDefault();
-//Vector3 position = myObject.transform.localPosition;
-//position.x = 0.2f;
-//position.y = 0.2f;
-//position.z = 0.0f;
-//myObject.transform.localPosition = position;
-
-//Rigidbody rObject = myObject.GetComponent<Rigidbody>();
-//rObject.velocity = new Vector3(5.0f, 5.0f, 0.0f);
-//this.objectsSpawned.Add(myObject);
-//}
-//Vector3 start = new Vector3(0.0f, 0.0f);
-//Vector3 end = new Vector3(0.0f, 0.0f);
-//Vector3 distance = new Vector3(0.0f, 0.0f);
-//RaycastHit hit;
-//Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-
-//if (Input.GetMouseButtonDown(0))
-//{
-//    if (Physics.Raycast(ray, out hit, Mathf.Infinity, layermask))
-//    {
-//        start = hit.point;
-//    }
-//}
-
-//if (Input.GetMouseButtonUp(0) && !(start.Equals((0.0f, 0.0f))))
-//{
-//    if (Physics.Raycast(ray, out hit, Mathf.Infinity, layermask))
-//    {
-//        end = hit.point;
-//        distance = start - end;
-//    }
-//    Debug.Log("Start: " + start + ", End: " + end);
-//    Debug.Log("Distance: " + distance);
-//    //Vector3 fPos = Input.mousePosition;
-//    //xDis = (fPos.x - iPos.x) / 10.0f;
-//    //yDis = (fPos.y - iPos.y) / 10.0f;
-//    //Debug.Log("Initial: " + iPos + ", Final: " + fPos);
-//    //Debug.Log("x: " + xDis + ", y: " + yDis);
-
-//    GameObject myObject = this.SpawnDefault();
-//    numArrows--;
-//    text.text = numArrows.ToString();
-//    Vector3 position = myObject.transform.localPosition;
-//    position.x = 0.7f;
-//    position.y = 0.2f;
-//    position.z = 0.0f;
-//    myObject.transform.localPosition = position;
-
-
-//    Rigidbody rObject = myObject.GetComponent<Rigidbody>();
-//    if (rObject == null)
-//    {
-//        myObject.AddComponent<Rigidbody>();
-//        rObject = myObject.GetComponent<Rigidbody>();
-//    }
-//    //rObject.isKinematic = true;
-//    rObject.constraints = RigidbodyConstraints.FreezePositionZ;
-//    rObject.velocity = new Vector3(distance.x * 3.0f, -(distance.y * 2.0f), 0.0f);
-//    Debug.Log(rObject.velocity);
-//    this.objectsSpawned.Add(myObject);

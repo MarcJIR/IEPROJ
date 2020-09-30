@@ -26,6 +26,7 @@ public class UIReceiver : MonoBehaviour
         EventBroadcaster.Instance.AddObserver(EventNames.Archery_Events.ON_GO_TO_MODE, this.GoToMode);
         EventBroadcaster.Instance.AddObserver(EventNames.Archery_Events.ON_GO_TO_SETTINGS, this.GoToSettings);
         EventBroadcaster.Instance.AddObserver(EventNames.Archery_Events.ON_EXIT_GAME, this.ExitGame);
+        EventBroadcaster.Instance.AddObserver(EventNames.Archery_Events.ON_RESET, this.ResetGS);
     }
 
     private void OnDestroy()
@@ -44,8 +45,8 @@ public class UIReceiver : MonoBehaviour
         EventBroadcaster.Instance.RemoveObserver(EventNames.Archery_Events.ON_GO_TO_ENDLESS);
         EventBroadcaster.Instance.RemoveObserver(EventNames.Archery_Events.ON_GO_TO_MODE);
         EventBroadcaster.Instance.RemoveObserver(EventNames.Archery_Events.ON_GO_TO_SETTINGS);
-        EventBroadcaster.Instance.RemoveObserver(EventNames.Archery_Events.ON_EXIT_GAME);
-        
+        EventBroadcaster.Instance.RemoveObserver(EventNames.Archery_Events.ON_EXIT_GAME); 
+        EventBroadcaster.Instance.RemoveObserver(EventNames.Archery_Events.ON_RESET);
     }
 
     // Update is called once per frame
@@ -92,16 +93,54 @@ public class UIReceiver : MonoBehaviour
         LoadManager.Instance.LoadScene(SceneNames.MODE);
     }
 
+    private void ResetGS()
+    {
+        for (int i = 1; i < 4; i++)
+        {
+            PlayerPrefs.SetInt("Level " + i, 0);
+            PlayerPrefs.SetInt("Level 1", 1);
+        }
+        PlayerPrefs.Save();
+    }
+
     private void SFX(Parameters parameter)
     {
-        string name = parameter.GetStringExtra("State", "");
-        Debug.Log(name);
+        GameObject button = parameter.GetGameObjectExtra("Button");
+        bool state = button.transform.Find("On").gameObject.activeSelf;
+        if (state)
+        {
+            button.transform.Find("On").gameObject.SetActive(false);
+            button.transform.Find("Off").gameObject.SetActive(true);
+            PlayerPrefs.SetInt("SFX", 0);
+            PlayerPrefs.Save();
+        }
+        else
+        {
+            button.transform.Find("On").gameObject.SetActive(true);
+            button.transform.Find("Off").gameObject.SetActive(false);
+            PlayerPrefs.SetInt("SFX", 1);
+            PlayerPrefs.Save();
+        }
     }
 
     private void Music(Parameters parameter)
     {
-        string name = parameter.GetStringExtra("State", "");
-        Debug.Log(name);
+        GameObject button = parameter.GetGameObjectExtra("Button");
+        bool state = button.transform.Find("On").gameObject.activeSelf;
+        if (state)
+        {
+            button.transform.Find("On").gameObject.SetActive(false);
+            button.transform.Find("Off").gameObject.SetActive(true);
+            PlayerPrefs.SetInt("Music", 0);
+            PlayerPrefs.Save();
+        }
+        else
+        {
+            button.transform.Find("On").gameObject.SetActive(true);
+            button.transform.Find("Off").gameObject.SetActive(false);
+            PlayerPrefs.SetInt("Music", 1);
+            PlayerPrefs.Save();
+        }
     }
 
     private void GoToLevelSelect(Parameters parameter)

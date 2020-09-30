@@ -23,6 +23,7 @@ public class Parameters {
 	//reference type parcelable
 	private Dictionary<string, ArrayList> arrayListData;
 	private Dictionary<string, object> objectListData;
+	private Dictionary<string, GameObject> gameObjectListData;
 
 
 	public Parameters() {
@@ -36,6 +37,7 @@ public class Parameters {
 		this.stringData = new Dictionary<string, string>();
 		this.arrayListData = new Dictionary<string, ArrayList>();
 		this.objectListData = new Dictionary<string, object>();
+		this.gameObjectListData = new Dictionary<string, GameObject>();
 	}
 
 	public void PutExtra(string paramName, bool value) {
@@ -82,6 +84,11 @@ public class Parameters {
 
 	public void PutObjectExtra(string paramName, object value) {
 		this.objectListData.Add(paramName, value);
+	}
+
+	public void PutGObjectExtra(string paramName, GameObject value){
+		this.gameObjectListData.Add(paramName, value);
+		//added by MarcJIR
 	}
 
 	public int GetIntExtra(string paramName, int defaultValue) {
@@ -183,5 +190,18 @@ public class Parameters {
 		else {
 			return null;
 		}
+	}
+
+	public GameObject GetGameObjectExtra(string paramName)
+	{
+		if (this.gameObjectListData.ContainsKey(paramName))
+		{
+			return this.gameObjectListData[paramName];
+		}
+		else
+		{
+			return null;
+		}
+		//added by MarcJIR
 	}
 }

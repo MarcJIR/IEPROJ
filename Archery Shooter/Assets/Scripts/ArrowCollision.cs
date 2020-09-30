@@ -59,8 +59,8 @@ public class ArrowCollision : MonoBehaviour
         int num = moveScript.ArrowsRemaining;
         if (hitObject.CompareTag("Target"))
         {
+            hitObject.tag = "Disabled";
             targetNumber--;
-            Debug.Log("Number of Target: "+targetNumber);
             moveScript.targetNumber = targetNumber;
         }
         if (targetNumber == 0)
